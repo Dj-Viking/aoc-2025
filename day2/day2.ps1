@@ -18,12 +18,11 @@ function get-invalid {
     )
     $isinvalid = $false;
 
-    # todo: check criteria for id
-    # if it is invalid
     # if a sequence is repeated in the nnumber
     # 55, 123123, 2323, all invalid
     $idstr = $id.ToString()
 
+    # kinda slow (shrugs..)
     if ($idstr.Length % 2 -eq 0) {
         $firsthalf = $idstr[0..$(($idstr.length / 2) - 1)] -join "";
         $lasthalf = $idstr[$($($idstr.length / 2))..$($idstr.Length - 1)] -join "";
