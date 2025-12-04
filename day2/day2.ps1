@@ -137,4 +137,4 @@ for ($i = 0; $i -lt $invalidIds.count; $i++) {
     $answer2 += $invalidIds[$i];
 }
 
-write-host "part2 $answer2"
+# write-host "part2 $answer2"
