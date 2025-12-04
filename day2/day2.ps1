@@ -37,6 +37,7 @@ function get-invalid {
     }
 }
 
+# part1
 foreach ($range in $ranges) {
     [string]$r = $range;
 
@@ -48,7 +49,6 @@ foreach ($range in $ranges) {
     }
 }
 
-
 $answer1 = 0;
 
 for ($i = 0; $i -lt $invalidIds.count; $i++) {
@@ -56,3 +56,62 @@ for ($i = 0; $i -lt $invalidIds.count; $i++) {
 }
 
 write-host "part 1 $answer1";
+
+#part2
+$invalidIds = [System.Collections.ArrayList]@();
+$answer2 = 0;
+
+function get-invalid2 {
+    [OutputType([void])]
+    param(
+        [parameter(position = 0)]
+        [int64]$id
+    )
+    $isinvalid = $false;
+
+    # if a sequence is repeated in the nnumber
+    # and 11111, or 2222222 (odd length id)
+    # 55, 123123, 2323, all invalid
+    # 56|56|56 is invalid 6 chars long but 3 repeating patterns
+    $idstr = $id.ToString()
+    $chrs = $idstr.ToCharArray();
+
+    # kinda slow (shrugs..)
+    if ($idstr.Length % 2 -eq 0) {
+        $firsthalf = $idstr[0..$(($idstr.length / 2) - 1)] -join "";
+        $lasthalf = $idstr[$($($idstr.length / 2))..$($idstr.Length - 1)] -join "";
+        if ($firsthalf -eq $lasthalf) {
+            write-host "invalid! $id"
+            $isinvalid = $true;
+        }
+    } 
+    # odd length of id
+    elseif ($idstr.Length % 2 -ne 0) {
+        $first = $chrs[0];
+        if ($idstr -match "$first{$($chrs.Length)}") {
+            write-host "invalid! $id"
+            $isinvalid = $true;
+        }
+    }
+
+    if ($isinvalid) {
+        $invalidIds.Add($id) | out-null;
+    }
+}
+
+foreach ($range in $ranges) {
+    [string]$r = $range;
+
+    $lower = [int64]($r.split("-")[0])
+    $upper = [int64]($r.split("-")[1])
+
+    for ($i = $lower; $i -le $upper; $i++) {
+        get-invalid2 $i
+    }
+}
+
+for ($i = 0; $i -lt $invalidIds.count; $i++) {
+    $answer2 += $invalidIds[$i];
+}
+
+write-host "part2 $answer2"
