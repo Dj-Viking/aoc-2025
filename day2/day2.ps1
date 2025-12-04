@@ -73,10 +73,12 @@ function get-invalid2 {
     # and 11111, or 2222222 (odd length id)
     # 55, 123123, 2323, all invalid
     # 56|56|56 is invalid 6 chars long but 3 repeating patterns
-    # 21|21|21|21|21
     $idstr = $id.ToString()
     $chrs = $idstr.ToCharArray();
     $hm = @{};
+
+    # note: maybe i can do something with sorting
+    # "323232".tochararray() | sort-object
 
     $firsthalf = $idstr[0..$(($idstr.length / 2) - 1)] -join "";
     $lasthalf = $idstr[$($($idstr.length / 2))..$($idstr.Length - 1)] -join "";
@@ -86,7 +88,9 @@ function get-invalid2 {
         write-host "invalid! $id"
         $isinvalid = $true;
     } 
-    # todo:????
+    # still even length
+    # 21|21|21|21|21
+    # todo:???? first doesn't equal last half
     elseif ($idstr.Length % 2 -eq 0 -and $firsthalf -ne $lasthalf) {
         foreach ($chr in $chrs) {
             if ($null -eq $hm[$chr]) {
