@@ -73,19 +73,38 @@ function get-invalid2 {
     # and 11111, or 2222222 (odd length id)
     # 55, 123123, 2323, all invalid
     # 56|56|56 is invalid 6 chars long but 3 repeating patterns
+    # 21|21|21|21|21
     $idstr = $id.ToString()
     $chrs = $idstr.ToCharArray();
+    $hm = @{};
 
-    # kinda slow (shrugs..)
-    if ($idstr.Length % 2 -eq 0) {
-        $firsthalf = $idstr[0..$(($idstr.length / 2) - 1)] -join "";
-        $lasthalf = $idstr[$($($idstr.length / 2))..$($idstr.Length - 1)] -join "";
-        if ($firsthalf -eq $lasthalf) {
-            write-host "invalid! $id"
-            $isinvalid = $true;
-        }
+    $firsthalf = $idstr[0..$(($idstr.length / 2) - 1)] -join "";
+    $lasthalf = $idstr[$($($idstr.length / 2))..$($idstr.Length - 1)] -join "";
+
+    # even length of id
+    if ($idstr.Length % 2 -eq 0 -and $firsthalf -eq $lasthalf) {
+        write-host "invalid! $id"
+        $isinvalid = $true;
+    } 
+    # todo:????
+    elseif ($idstr.Length % 2 -eq 0 -and $firsthalf -ne $lasthalf) {
+        foreach ($chr in $chrs) {
+            if ($null -eq $hm[$chr]) {
+                $hm[$chr] = 1;
+            } else {
+                $hm[$chr] += 1;
+            }
+
+        }    
+
+        write-host "id: $id"
+        write-host $hm
     } 
     # odd length of id
+    # also length of 9 with different pattern
+    # how todo???:
+    # 824|824|824
+    # they don't have constantly repeating same nums
     elseif ($idstr.Length % 2 -ne 0) {
         $first = $chrs[0];
         if ($idstr -match "$first{$($chrs.Length)}") {
