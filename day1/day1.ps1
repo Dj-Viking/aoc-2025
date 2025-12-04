@@ -4,11 +4,11 @@ param(
 
 $dial = 50;
 
-$input = get-content -path $file;
+$in = get-content -path $(join-path $psscriptroot $file);
 
 $timescrossedzerogoingleft = 0;
 
-foreach ($line in $input) {
+foreach ($line in $in) {
 	[string]$l = $line;
 	$direction = $l[0]
 	
@@ -53,7 +53,7 @@ $timescrossedzero = 0;
 
 # part 2 check every movement tick if we crossed
 # zero
-foreach ($line in $input) {
+foreach ($line in $in) {
 	[string]$l = $line;
 	$direction = $l[0]
 	
