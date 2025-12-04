@@ -39,8 +39,6 @@ foreach ($line in $input) {
 		$timescrossedzerogoingleft++;
 	}
 
-	$prevdirection = $direction
-
 }
 
 # 24 was wrong!!
