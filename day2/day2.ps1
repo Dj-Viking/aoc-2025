@@ -69,53 +69,16 @@ function get-invalid2 {
     )
     $isinvalid = $false;
 
-    # if a sequence is repeated in the nnumber
-    # and 11111, or 2222222 (odd length id)
-    # 55, 123123, 2323, all invalid
-    # 56|56|56 is invalid 6 chars long but 3 repeating patterns
-    $idstr = $id.ToString()
-    $chrs = $idstr.ToCharArray();
-    $hm = @{};
+	$idstr = $id.tostring();
 
-    # note: maybe i can do something with sorting
-    # "323232".tochararray() | sort-object
-
-    $firsthalf = $idstr[0..$(($idstr.length / 2) - 1)] -join "";
-    $lasthalf = $idstr[$($($idstr.length / 2))..$($idstr.Length - 1)] -join "";
-
-    # even length of id
-    if ($idstr.Length % 2 -eq 0 -and $firsthalf -eq $lasthalf) {
-        write-host "invalid! $id"
-        $isinvalid = $true;
-    } 
-    # still even length
-    # 21|21|21|21|21
-    # todo:???? first doesn't equal last half
-    elseif ($idstr.Length % 2 -eq 0 -and $firsthalf -ne $lasthalf) {
-        foreach ($chr in $chrs) {
-            if ($null -eq $hm[$chr]) {
-                $hm[$chr] = 1;
-            } else {
-                $hm[$chr] += 1;
-            }
-
-        }    
-
-        write-host "id: $id"
-        write-host $hm
-    } 
-    # odd length of id
-    # also length of 9 with different pattern
-    # how todo???:
-    # 824|824|824
-    # they don't have constantly repeating same nums
-    elseif ($idstr.Length % 2 -ne 0) {
-        $first = $chrs[0];
-        if ($idstr -match "$first{$($chrs.Length)}") {
-            write-host "invalid! $id"
-            $isinvalid = $true;
-        }
-    }
+    <#
+    referenced from
+    https://stackoverflow.com/questions/72338276/powershell-regex-gis-flags-support
+    #>
+	if ($idstr -match "(?<=\b)(\d+)\1+(?=\b)") {
+        write-host $matches
+		$isinvalid = $true;
+	}
 
     if ($isinvalid) {
         $invalidIds.Add($id) | out-null;
@@ -137,4 +100,4 @@ for ($i = 0; $i -lt $invalidIds.count; $i++) {
     $answer2 += $invalidIds[$i];
 }
 
-# write-host "part2 $answer2"
+write-host "part2 $answer2"
