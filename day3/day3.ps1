@@ -13,10 +13,9 @@ $in = get-content $(join-path `
 #part1
 foreach($line in $in) {
 	$joltages = @();
-	write-host "======line"
-	write-host $line
-	$chrs = $line.tochararray()
-	$chrs | foreach-object {
+	# write-host "======line"
+	# write-host $line
+	$line.tochararray() | foreach-object {
 		$joltages += [int]($_.tostring());
 	}
 
@@ -50,8 +49,8 @@ foreach($line in $in) {
 
 	$maxjts += $jt
 
-	write-host "=====maxjts"
-	write-host $maxjts
+	# write-host "=====maxjts"
+	# write-host $maxjts
 }
 
 $sum = 0;
