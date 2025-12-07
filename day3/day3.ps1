@@ -39,6 +39,7 @@ foreach($line in $in) {
 	{
 	write-host "bats begin loop [$bats]"
 		$bat = $joltages[$i];
+		
 		if ($part2) {
 			if ($bats[-1] -eq 0 `
 			-and $bats[$i] -lt $bat `
