@@ -26,7 +26,6 @@ foreach($line in $in) {
 #	batteries labeled 8 and 9, 
 #	producing 89 jolts.
 	#>
-	$bats = @() 
 	$first_idx = 0;
 	$second_idx = 1;
 	:firstpass for ($i = 0; $i -lt $joltages.length - 1; $i++) 
@@ -35,7 +34,6 @@ foreach($line in $in) {
 		if ($bat -gt $joltages[$first_idx]) {
 			$first_idx = $i
 		}
-		
 	}
 	$second_idx = $first_idx + 1;
 	:secondpass for ($i = $first_idx + 1; $i -lt $joltages.length; $i++) 
@@ -44,7 +42,6 @@ foreach($line in $in) {
 		if ($bat -gt $joltages[$second_idx]) {
 			$second_idx = $i
 		}
-		
 	}
 
 	$jt = $($joltages[$first_idx] * 10 
@@ -65,5 +62,3 @@ $maxjts | ForEach-Object {
 
 # 16738 too low
 write-host "answer1: $sum"
-
-
