@@ -5,7 +5,7 @@ param(
 
 $joltages = @();
 $maxjts = @();
-$maxjts2 = @();
+$maxjts2 = [system.collections.arraylist]@();
 
 $in = get-content $(join-path `
 	$psscriptroot `
@@ -24,36 +24,28 @@ foreach($line in $in) {
 #	batteries labeled 8 and 9, 
 #	producing 89 jolts.
 	#>
-	$first_idx = 0;
-	$second_idx = 1;
-	$prev_idx = 0;
-	:firstpass for ($i = 0; $i -le $joltages.length; $i++) 
-	{
-		$bat = $joltages[$i];
-		if ($prev_idx -ge 12) {
-			$prev_idx = 11;
-		}
-	}
+	$max_index = 0;
 	#separating part1 loop since it's different
 	:firstpass for ($i = 0; $i -lt $joltages.length - 1; $i++) 
 	{
 		$bat = $joltages[$i];
-		if ($bat -gt $joltages[$first_idx]) {
-			$first_idx = $i
+		if ($bat -gt $joltages[$max_index]) {
+			$max_index = $i
 		}
 	}
 
-	$second_idx = $first_idx + 1;
-	:secondpass for ($i = $first_idx + 1; $i -lt $joltages.length; $i++) 
+	# start after the one we found previous pass
+	$next_max_index = $max_index + 1;
+	:secondpass for ($i = $max_index + 1; $i -lt $joltages.length; $i++) 
 	{
 		$bat = $joltages[$i];
-		if ($bat -gt $joltages[$second_idx]) {
-			$second_idx = $i
+		if ($bat -gt $joltages[$next_max_index]) {
+			$next_max_index = $i
 		}
 	}
 
-	$jt = $($joltages[$first_idx] * 10 
-		+ $joltages[$second_idx]
+	$jt = $($joltages[$max_index] * 10 
+		+ $joltages[$next_max_index]
 	)
 
 
@@ -71,5 +63,42 @@ $maxjts | ForEach-Object { $sum += $_; }
 write-host "answer1: $sum"
 
 #part2
+[int64]$sum2 = 0;
+foreach($line in $in) {
+	$joltages = @();
+	$maxjts2 = [system.collections.arraylist]@();
+	$line.tochararray() | foreach-object {
+		$joltages += [int]($_.tostring());
+	}
+	
+	# find 12 digits
+	# largest num  for all values excluding last 11 values
+	# last 11 need to be included in number no search on those
+	# o
+	# find max value upt o index N - 11 search 2342
+	#   # search : (2342) chop| 34234234278
+		# max:4
+	
+	$max_index = 0;
+	for ($needed = 11; `
+		 $needed -ge 0; $needed--) 
+	{
 
-$sum2 = 0;
+		for ($i = $max_index; `
+			 $i -lt $joltages.length - $needed; $i++) 
+		{
+			if ($joltages[$i] -gt $joltages[$max_index]) {
+				$max_index = $i;
+			}
+		}
+
+		$maxjts2.add($joltages[$max_index]) | out-null;
+		$max_index = $max_index + 1;
+
+	}
+
+	$sum2 += [int64]("$($maxjts2 -join `"`")");
+}
+
+write-host "answer2: $sum2"
+
