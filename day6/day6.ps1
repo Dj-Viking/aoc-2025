@@ -70,5 +70,28 @@ foreach ($col in $cols) {
 write-host "part1: $sum"
 # columns have a signed operation for them all
 # what is sum of all the column results?
-#
+
 #part2
+
+# now operating on individual columns 
+# in right-to-left 
+# order
+# but also top to bottom of that column of numbers
+<#           3  2  1
+123|328| 51|(6){4} 
+ 45|64 |387|(2){3} 
+  6|98 |215|(3){1}[4]
+*   +   *   +  
+
+first calculation would be [4] + {431} + (623)
+
+need to preserve the spacing for the parsing here now..
+there are at most 4 columns for input including spaces
+
+and 3 columns for sample
+
+negative indexing in powershell can be helpful here
+to do a reverse lookup of the char array to know 
+what number to parse from right to left for each column
+
+#>
