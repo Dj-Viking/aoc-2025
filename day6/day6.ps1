@@ -95,3 +95,83 @@ to do a reverse lookup of the char array to know
 what number to parse from right to left for each column
 
 #>
+# numbers + space delimiter
+$colWidth = 0;
+if ($file -eq "input") {
+	$colWidth = 5;
+} else {
+	$colWidth = 4;
+}
+
+$cols = $null 
+$grid = [system.collections.arraylist]@()
+for ($r = 0;$r -lt $rows;$r++) {
+	$temp = [system.collections.arraylist]@();
+	$grid.add($temp) | out-null;
+}
+
+for ($r = 0; $r -lt $in.length;$r++) {
+	$rowchars = $in[$r].tochararray();
+	for ($c = 0; $c -lt $rowchars.length;$c++) {
+		$grid[$r].add($rowchars[$c]) | out-null;
+	}
+}
+
+function dumpgrid {
+	write-host "$($($grid.count * $grid[0].count) / $colWidth)"
+	$stack = 0;
+
+	for ($loc = 0; 
+	     $loc -lt $($grid.count * $grid[0].count / $colWidth);
+		 $null) 
+	{
+		for ($r = 0; $r -lt $grid.count; $r++) 
+		{
+			$row = "";
+
+			for ($c = 0; $c -lt $grid[0].count; $c++) {
+				if ($loc -eq $c -and ($c - $loc) % $colWidth -eq 0) {
+					$row += "[$($grid[$r][$loc])]"
+				} else {
+					$row += $grid[$r][$c]
+				}
+			}
+			write-host "stack $stack - r $r - loc $loc - $row"
+
+		}
+		read-host "skjdf";
+		$loc++;
+		$stack++;
+		if ($loc % $colWidth -eq 0) {
+			$stack = 0;
+		}
+	}
+}
+
+dumpgrid
+# get the signs for each column
+# gather the columns together as list of columns
+# cols
+# @(
+#     col
+#     @(
+#       rows
+#       @(
+#         # reverse order of section
+#         row@(|123 ... ... 123|)
+#         row@(|12  ..  ..   23|)
+#         row@(|  1  ..  ..  2 |)
+#         op,
+#       )
+#       rows
+#       @(...)
+#     )
+#     col
+#     @(...)
+# )
+#
+
+# read right to left, top to bottom
+# by reverse order of the rows
+# and reverse order of the column
+
