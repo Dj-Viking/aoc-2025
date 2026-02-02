@@ -121,8 +121,8 @@ function dumpgrid {
 	write-host "$($($grid.count * $grid[0].count) / $colWidth)"
 	$stack = 0;
 
-	for ($loc = 0; 
-	     $loc -lt $($grid.count * $grid[0].count / $colWidth);
+	for ($loc = $($grid.count * $grid[0].count / $colWidth); 
+	     $loc -ge 0;
 		 $null) 
 	{
 		for ($r = 0; $r -lt $grid.count; $r++) 
@@ -140,7 +140,7 @@ function dumpgrid {
 
 		}
 		read-host "skjdf";
-		$loc++;
+		$loc--;
 		$stack++;
 		if ($loc % $colWidth -eq 0) {
 			$stack = 0;
