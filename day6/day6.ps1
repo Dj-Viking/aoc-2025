@@ -1,3 +1,4 @@
+using namespace System.Collections;
 param(
 	[parameter(position = 0)]
 	[string]$file = "sample"
@@ -28,12 +29,12 @@ if ($file -eq "sample") {
 	$rows = 4;
 }
 
-$cols = [system.collections.arraylist]@();
+$cols = [arraylist]@();
 
 $len = $($in[0].split(" ", [stringsplitoptions]::removeemptyentries).length);
 for ($l = 0; $l -lt $len; $l++) 
 {
-	$temp = [system.collections.arraylist]@();
+	$temp = [arraylist]@();
 	for ($r = 0; $r -lt $rows; $r++) {
 		# write-host "$($in[$r].length)";
 
@@ -96,71 +97,66 @@ what number to parse from right to left for each column
 
 #>
 # numbers + space delimiter
-$colWidth = 0;
-if ($file -eq "input") {
-	$colWidth = 4;
+$colWidth = $(if ($file -eq "input") {
+	5
 } else {
-	$colWidth = 4;
-}
+	4
+});
 
 class Section {
 	$op = ""
-	$digits = [system.collections.arraylist]@()
+	$digits = [arraylist]@()
 	$complete = $false
 
-	Update($num_columns) {
-		write-host "columns split $($num_columns.count)"
+	[void]Update($num_columns) {
+		$width = $num_columns.count;
+		write-host "columns count $($num_columns.count)"
 
 		if ("+" -in $num_columns -or "*" -in $num_columns) {
 			$this.op = $($num_columns | ? { $_ -match "\*" -or $_ -match "\+" })[0]
 		}
 
-		if ($($num_columns | ? {$_ -match "\d"}).length  -eq 1) {
-			$this.digits = [int64]($($num_columns | ? { $_ -match "\d" }).tostring());
+		$nms = $($num_columns | ? { $_ -match "\d" })
+
+		if ($nms.count -eq 1) {
+			$nms = $nms.ToString()
 		} else {
-			$this.digits = [int64]($($num_columns | ? { $_ -match "\d" }).join(""));
-		}
+			$numstr = ""
+			for ($i = 0; $i -lt $nms.Length;$i++) 
+			{
+				$numstr += $nms[$i];
+			}
+			$nms = $numstr;
+		} 
+		$this.digits.add([int64]($nms)) | out-null;
+
+		write-host "digits $($this.digits | % { write-host $_})"
 
 		write-host "op $($this.op)"
-		write-host "digits $($this.digits) len $($this.digits.gettype())"
-	}
-	# somehow precompute the width by looking ahead at the 
-	# next section delimited by all spaces if any???
-	Section($num_columns, $width) {
-		#todo parse the columns into the digits
-		# by using the width to figure out most significant
-		# digits
-		$this.digits = $num_columns;
-		write-host "in the Section num_columns $($this.digits)"
-		write-host "in the Section width       $($width)"
-		for ($n = 0; $n -lt $num_columns.count; $n++) {
-			if ($num_columns[$n] -eq "*" -or `
-				$num_columns[$n] -eq "+") 
-			{
-				$this.op = $num_columns[$n];
-				$this.complete = $true;
-			}
+		write-host "digits [$($this.digits)] len $($this.digits.count)"
+
+		if ($this.digits.Count -eq $($num_columns.count - 1) -and $($this.op -eq "*" -or $this.op -eq "+")) {
+			$this.complete = $true;
 		}
-		# read-host "look"
 	}
+
+	Section() {}
 
 	static DebugSections($sections) {
-		# for ($i = 0; $sections.list.count;$i++) {
-			# write-host "section $i oop is $($sections.list[$i].op)"
-			# write-host "section $i list $($sections.list[$i].digits)";
-			# read-host "debug me ";
-		# }
+		for ($i = 0; $i -lt $sections.list.count;$i++) {
+			write-host "section $i oop is $($sections.list[$i].op)"
+			write-host "section $i list $($sections.list[$i].digits | % {write-host $_})";
+		}
 	}
 }
 
-$cols = $null 
 $sections = @{
 	finished = $false
-	list = [system.collections.arraylist]@()
+	list = [arraylist]@()
 }
-$grid = [system.collections.arraylist]@()
+$grid = [arraylist]@()
 for ($r = 0;$r -lt $rows;$r++) {
-	$temp = [system.collections.arraylist]@();
+	$temp = [arraylist]@();
 	$grid.add($temp) | out-null;
 }
 
@@ -175,10 +171,7 @@ for ($r = 0; $r -lt $in.length;$r++) {
 function part2 {
 	while (-not $sections.finished) {
 		for ($r = 0; $r -lt $grid.count;$r++) {
-			$section = [Section]::new(
-				[system.collections.arraylist]@(),
-				0
-			);
+			$section = [Section]::new();
 			:section for ($c = 0; $c -lt $grid[$r].count;$c++) {
 				# reached the end of the column break
 				if ($grid[$($grid.count - 4)][$c] -eq " " -and `
@@ -193,10 +186,15 @@ function part2 {
 					#
 					if ($section.complete) {
 						$null = $sections.list.add($section);
+						$section = [Section]::new();
+
 						[Section]::DebugSections($sections);
+						write-host "$($sections.count)";
+						read-host "continue to next section";
+						continue section;
 					}
-					break section; 
 				}
+				# todo not reaching the end to set sections finished...
 
 				# todo input has 5 items!!!
 				# $item0 = $grid[$grid.count - 5][$c]
@@ -211,13 +209,11 @@ function part2 {
 				write-host "item3 [$item3]"
 				write-host "item4 [$item4]"
 
-				parsegrid
 
 				write-host "make section"
-				read-host "akjsdfj";
 
 				#make up section
-				$num_columns = [system.collections.arraylist]@(
+				$num_columns = [arraylist]@(
 					# todo
 					# $item0,
 					$item1,
@@ -230,6 +226,13 @@ function part2 {
 				# $section.digits.add($item2) | out-null;
 				# $section.digits.add($item3) | out-null;
 				#todo item4
+			}
+			write-host "what is length of row $($grid[0].count) and col width $($colWidth)"
+			read-host "continue to next section";
+			if ($sections.list.count -eq $($($grid[0].split(" ", [stringsplitoptions]::removeemptyentries).length / $($colWidth - 1) - 1))) {
+				$sections.finished = $true;
+				# todo
+				read-host "get answer from all sections!";
 			}
 		}
 	}
@@ -251,29 +254,28 @@ function parsegrid {
 				if ($loc -eq $c -and ($c - $loc) % $colWidth -eq 0) {
 					#digit
 					if ($r -eq 0) {
-						# write-host "r is 0 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 0 $r - c:$c - item:$($grid[$r][$c])"
 					}
 					#digit
 					if ($r -eq 1) {
-						# write-host "r is 1 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 1 $r - c:$c - item:$($grid[$r][$c])"
 					}
 					#digit
 					if ($r -eq 2) {
-						# write-host "r is 2 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 2 $r - c:$c - item:$($grid[$r][$c])"
 					}
 					#op
 					if ($r -eq 3) {
-						# write-host "r is 3 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 3 $r - c:$c - item:$($grid[$r][$c])"
 					}
 					$row += "[$($grid[$r][$loc])]"
 				} else {
 					$row += $grid[$r][$c]
 				}
 			}
-			# write-host "stack $stack - r $r - loc $loc - $row"
+			write-host "stack $stack - r $r - loc $loc - $row"
 
 		}
-		# read-host "skjdf";
 		$loc--;
 		$stack++;
 		if ($loc % $colWidth -eq 0) {
