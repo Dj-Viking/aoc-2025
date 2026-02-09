@@ -108,8 +108,7 @@ class Section {
 	$digits = [arraylist]@()
 	$complete = $false
 
-	[void]Update($num_columns) {
-		$width = $num_columns.count;
+	[void]Update($num_columns, $rows, $sectioncount) {
 		write-host "columns count $($num_columns.count)"
 
 		if ("+" -in $num_columns -or "*" -in $num_columns) {
@@ -135,7 +134,7 @@ class Section {
 		write-host "op $($this.op)"
 		write-host "digits [$($this.digits)] len $($this.digits.count)"
 
-		if ($this.digits.Count -eq $($num_columns.count - 1) -and $($this.op -eq "*" -or $this.op -eq "+")) {
+		if ($this.digits.Count -eq $($rows - 1) -and $($this.op -eq "*" -or $this.op -eq "+")) {
 			$this.complete = $true;
 		}
 	}
@@ -154,123 +153,123 @@ $sections = @{
 	finished = $false
 	list = [arraylist]@()
 }
-$grid = [arraylist]@()
+$_grid = [arraylist]@()
 for ($r = 0;$r -lt $rows;$r++) {
 	$temp = [arraylist]@();
-	$grid.add($temp) | out-null;
+	$_grid.add($temp) | out-null;
 }
 
 
 for ($r = 0; $r -lt $in.length;$r++) {
 	$rowchars = $in[$r].tochararray();
 	for ($c = 0; $c -lt $rowchars.length;$c++) {
-		$grid[$r].add($rowchars[$c]) | out-null;
+		$_grid[$r].add($rowchars[$c]) | out-null;
 	}
 }
 
 function part2 {
-	while (-not $sections.finished) {
-		for ($r = 0; $r -lt $grid.count;$r++) {
-			$section = [Section]::new();
-			:section for ($c = 0; $c -lt $grid[$r].count;$c++) {
-				# reached the end of the column break
-				if ($grid[$($grid.count - 4)][$c] -eq " " -and `
-					$grid[$($grid.count - 3)][$c] -eq " " -and `
-					$grid[$($grid.count - 2)][$c] -eq " " -and `
-					$grid[$($grid.count - 1)][$c] -eq " " `
-					# todo input has 5 rows!!
-				){ 
-					# section complete...
-					# we added columns that had one of the ops..
-					# add section
-					#
-					if ($section.complete) {
-						$null = $sections.list.add($section);
-						$section = [Section]::new();
 
-						[Section]::DebugSections($sections);
-						write-host "$($sections.count)";
-						read-host "continue to next section";
-						continue section;
-					}
-				}
-				# todo not reaching the end to set sections finished...
-
-				# todo input has 5 items!!!
-				# $item0 = $grid[$grid.count - 5][$c]
-				$item1 = $grid[$($grid.count - 4)][$c]
-				$item2 = $grid[$($grid.count - 3)][$c]
-				$item3 = $grid[$($grid.count - 2)][$c]
-				$item4 = $grid[$($grid.count - 1)][$c]
-				
-				write-host "in the Section "
-				write-host "item1 [$item1]"
-				write-host "item2 [$item2]"
-				write-host "item3 [$item3]"
-				write-host "item4 [$item4]"
-
-
-				write-host "make section"
-
-				#make up section
-				$num_columns = [arraylist]@(
-					# todo
-					# $item0,
-					$item1,
-					$item2,
-					$item3,
-					$item4
-				);
-				$section.Update($num_columns);
-				# $section.digits.add($item1) | out-null;
-				# $section.digits.add($item2) | out-null;
-				# $section.digits.add($item3) | out-null;
-				#todo item4
-			}
-			write-host "what is length of row $($grid[0].count) and col width $($colWidth)"
-			read-host "continue to next section";
-			if ($sections.list.count -eq $($($grid[0].split(" ", [stringsplitoptions]::removeemptyentries).length / $($colWidth - 1) - 1))) {
-				$sections.finished = $true;
-				# todo
-				read-host "get answer from all sections!";
-			}
+	:dude while ($true)  {
+		if ($sections.finished)  {
+			break dude;
 		}
+		$section = [Section]::new();
+		$rowstr = $_grid[0] -join "";
+		$rowstrsplit = $rowstr.split(" ", [stringsplitoptions]::removeemptyentries);
+		$sectioncount = $rowstrsplit.length;
+		read-host "sectioncount $($sectioncount)"
+		# not sure how to fix getting it not looping forever....
+		# something is wrong here
+		:section for ($c = 0; $c -le $sectioncount;$c++) {
+			# here might be spaces or the end of the section
+			# list
+			if ($section.complete) {
+				$null = $sections.list.add($section);
+				$section = [Section]::new();
+
+				[Section]::DebugSections($sections);
+				write-host "$($sections.list.count)";
+				# read-host "continue to next section";
+				continue section;
+			}
+			# todo not reaching the end to set sections finished...
+
+			# todo input has 5 items!!!
+			# $item0 = $_grid[$_grid.count - 5][$c]
+			$item1 = $_grid[$($_grid.count - 4)][$c]
+			$item2 = $_grid[$($_grid.count - 3)][$c]
+			$item3 = $_grid[$($_grid.count - 2)][$c]
+			$item4 = $_grid[$($_grid.count - 1)][$c]
+			
+			write-host "in the Section "
+			write-host "item1 [$item1]"
+			write-host "item2 [$item2]"
+			write-host "item3 [$item3]"
+			write-host "item4 [$item4]"
+
+			write-host "make section"
+
+			# read-host "check section stuff"
+
+			#make up section
+			$num_columns = [arraylist]@(
+				# todo
+				# $item0,
+				$item1,
+				$item2,
+				$item3,
+				$item4
+			);
+			$section.Update($num_columns, $num_columns.count, $sectioncount);
+		}
+
+		$rowstr = $_grid[0] -join ""
+		$splitrowstr = $rowstr.split(" ", [stringsplitoptions]::removeemptyentries);
+		write-host "what is length of row $($_grid[0].count) sectioncount: $($splitrowstr.length) and col width $($colWidth)" # read-host "continue to next section"; $opoffset = 1
+		$opoffset = 1;
+		if ($sections.list.count -eq $splitrowstr.length){
+			$sections.finished = $true;
+			# todo
+			# read-host "get answer from all sections!";
+		}
+
 	}
 }
+
 function parsegrid {
-	write-host "$($($grid.count * $grid[0].count) / $colWidth)"
+	write-host "$($($_grid.count * $_grid[0].count) / $colWidth)"
 	$stack = 0;
 
-	for ($loc = $($grid.count * $grid[0].count / $colWidth);
+	for ($loc = $($_grid.count * $_grid[0].count / $colWidth);
 	     $loc -ge 0;
 		 $null)
 	{
-		for ($r = 0; $r -lt $grid.count; $r++) 
+		for ($r = 0; $r -lt $_grid.count; $r++) 
 		{
 			$row = "";
-			for ($c = 0; $c -lt $grid[0].count; $c++) 
+			for ($c = 0; $c -lt $_grid[0].count; $c++) 
 			{
 				# if all items are empty skip the iteration of collecting the column information
 				if ($loc -eq $c -and ($c - $loc) % $colWidth -eq 0) {
 					#digit
 					if ($r -eq 0) {
-						write-host "r is 0 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 0 $r - c:$c - item:$($_grid[$r][$c])"
 					}
 					#digit
 					if ($r -eq 1) {
-						write-host "r is 1 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 1 $r - c:$c - item:$($_grid[$r][$c])"
 					}
 					#digit
 					if ($r -eq 2) {
-						write-host "r is 2 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 2 $r - c:$c - item:$($_grid[$r][$c])"
 					}
 					#op
 					if ($r -eq 3) {
-						write-host "r is 3 $r - c:$c - item:$($grid[$r][$c])"
+						write-host "r is 3 $r - c:$c - item:$($_grid[$r][$c])"
 					}
-					$row += "[$($grid[$r][$loc])]"
+					$row += "[$($_grid[$r][$loc])]"
 				} else {
-					$row += $grid[$r][$c]
+					$row += $_grid[$r][$c]
 				}
 			}
 			write-host "stack $stack - r $r - loc $loc - $row"
